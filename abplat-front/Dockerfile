@@ -3,14 +3,18 @@
 # Stage 1: Build stage
 FROM node:18-alpine as build
 
+# Instaliramo git (potrebno za neke npm pakete)
+RUN apk add --no-cache git
+
 # Postavljamo radni direktorijum
 WORKDIR /app
 
 # Kopiramo package.json i package-lock.json
 COPY package*.json ./
 
-# Instaliramo dependencies
-RUN npm ci --only=production
+# Čistimo npm cache i instaliramo dependencies
+RUN npm cache clean --force
+RUN npm ci --legacy-peer-deps
 
 # Kopiramo source kod
 COPY . .
