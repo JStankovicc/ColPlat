@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # MySQL baza podataka
+  mysql:
+    image: mysql:8.0
+    container_name: abplat-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ROOT
+      MYSQL_DATABASE: colplat
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - abplat-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # phpMyAdmin za upravljanje bazom
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: abplat-phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ROOT
+      MYSQL_ROOT_PASSWORD: ROOT
+    ports:
+      - "8081:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - abplat-network
+
+  # Spring Boot backend
+  backend:
+    build:
+      context: ./ColPlatBack
+      dockerfile: Dockerfile
+    container_name: abplat-backend
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/colplat?useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ROOT
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - abplat-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+
+  # React frontend
+  frontend:
+    build:
+      context: ./abplat-front
+      dockerfile: Dockerfile
+    container_name: abplat-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - abplat-network
+
+# Volumes za perzistentnost podataka
+volumes:
+  mysql_data:
+    driver: local
+
+# Network za komunikaciju između servisa
+networks:
+  abplat-network:
+    driver: bridge
