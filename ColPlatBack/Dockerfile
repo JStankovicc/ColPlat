@@ -10,15 +10,18 @@ WORKDIR /app
 # Kopiramo sve potrebno odjednom
 COPY . .
 
-# Debug - proveravamo šta je kopirano
+# Debug - proveravamo šta je kopirano i case-sensitivity
 RUN echo "=== ROOT DIRECTORY ==="
 RUN ls -la .
 RUN echo "=== SRC DIRECTORY ==="
 RUN ls -la src/
-RUN echo "=== SRC/MAIN DIRECTORY ==="
+RUN echo "=== SRC/MAIN DIRECTORY (case-sensitive check) ==="
 RUN ls -la src/main/
-RUN echo "=== LOOKING FOR JAVA FILES ==="
-RUN find . -name "*.java" | head -5 || echo "No Java files found"
+RUN ls -la src/main/ | grep -i java || echo "No java directory found"
+RUN echo "=== LOOKING FOR JAVA FILES ANYWHERE ==="
+RUN find . -name "*.java" | head -10 || echo "No Java files found"
+RUN echo "=== DIRECTORY TREE ==="
+RUN find src/ -type d | head -10 || echo "No directories found"
 
 # Preuzimamo dependencies
 RUN mvn dependency:go-offline -B
