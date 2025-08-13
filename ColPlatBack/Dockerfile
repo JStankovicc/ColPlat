@@ -1,5 +1,5 @@
 # Multi-stage build za optimizaciju
-FROM openjdk:17-jdk-alpine as builder
+FROM eclipse-temurin:17-jdk-alpine as builder
 
 # Postavljamo radni direktorijum
 WORKDIR /app
@@ -23,7 +23,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests -B
 
 # Production stage
-FROM openjdk:17-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 # Instaliramo curl i netcat za health check
 RUN apk add --no-cache curl netcat-openbsd
