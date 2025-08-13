@@ -10,16 +10,18 @@ WORKDIR /app
 # Kopiramo sve potrebno odjednom
 COPY . .
 
+# Debug - proveravamo šta je kopirano
+RUN echo "=== ROOT DIRECTORY ==="
+RUN ls -la .
+RUN echo "=== SRC DIRECTORY ==="
+RUN ls -la src/
+RUN echo "=== SRC/MAIN DIRECTORY ==="
+RUN ls -la src/main/
+RUN echo "=== LOOKING FOR JAVA FILES ==="
+RUN find . -name "*.java" | head -5 || echo "No Java files found"
+
 # Preuzimamo dependencies
 RUN mvn dependency:go-offline -B
-
-# Debug - proveravamo da li su source fajlovi kopirani
-RUN ls -la src/
-RUN ls -la src/main/
-RUN ls -la src/main/java/ || echo "Java dir not found"
-RUN ls -la src/main/java/com/ || echo "com dir not found"  
-RUN ls -la src/main/java/com/ColPlat/ || echo "ColPlat dir not found"
-RUN ls -la src/main/java/com/ColPlat/Backend/ || echo "Backend dir not found"
 
 # Buildujemo aplikaciju
 RUN mvn clean package -DskipTests -B
