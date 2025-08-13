@@ -19,6 +19,11 @@ COPY src ./src
 # Buildujemo aplikaciju
 RUN mvn clean package -DskipTests -B
 
+# Debug - proveravamo šta je kreirano
+RUN ls -la target/
+RUN ls -la target/classes/com/ColPlat/Backend/ || echo "Classes not found"
+RUN jar tf target/Backend-0.0.1-SNAPSHOT.jar | head -20 || echo "JAR inspection failed"
+
 # Ekspozujemo port 8080
 EXPOSE 8080
 
