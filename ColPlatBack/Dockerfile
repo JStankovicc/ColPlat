@@ -1,8 +1,8 @@
 # Koristimo OpenJDK 17 kao base image
 FROM openjdk:17-jdk-alpine
 
-# Instaliramo curl za health check
-RUN apk add --no-cache curl
+# Instaliramo curl i netcat za health check
+RUN apk add --no-cache curl netcat-openbsd
 
 # Postavljamo radni direktorijum
 WORKDIR /app
