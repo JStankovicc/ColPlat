@@ -16,6 +16,10 @@ RUN mvn dependency:go-offline -B
 # Kopiramo source kod
 COPY src ./src
 
+# Debug - proveravamo da li su source fajlovi kopirani
+RUN ls -la src/
+RUN ls -la src/main/java/com/ColPlat/Backend/ || echo "Source files not found"
+
 # Buildujemo aplikaciju
 RUN mvn clean package -DskipTests -B
 
