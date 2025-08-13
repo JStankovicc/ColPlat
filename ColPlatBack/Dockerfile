@@ -1,41 +1,26 @@
-# Multi-stage build za optimizaciju
-FROM eclipse-temurin:17-jdk-alpine as builder
+# Jednostavan build sa Maven-om
+FROM eclipse-temurin:17-jdk-alpine
+
+# Instaliramo Maven, curl i netcat
+RUN apk add --no-cache maven curl netcat-openbsd
 
 # Postavljamo radni direktorijum
 WORKDIR /app
 
-# Kopiramo Maven wrapper i pom.xml prvo (za cache-ovanje dependencies)
-COPY mvnw .
-COPY mvnw.cmd .
+# Kopiramo pom.xml prvo za cache-ovanje dependencies
 COPY pom.xml .
-COPY .mvn .mvn
 
-# Dajemo dozvole za izvršavanje Maven wrapper-a
-RUN chmod +x ./mvnw
-
-# Preuzimamo dependencies (ovo će biti cache-ovano)
-RUN ./mvnw dependency:go-offline -B
+# Preuzimamo dependencies
+RUN mvn dependency:go-offline -B
 
 # Kopiramo source kod
 COPY src ./src
 
-# Buildujemo aplikaciju (preskačemo testove za brzinu)
-RUN ./mvnw clean package -DskipTests -B
-
-# Production stage
-FROM eclipse-temurin:17-jre-alpine
-
-# Instaliramo curl i netcat za health check
-RUN apk add --no-cache curl netcat-openbsd
-
-# Postavljamo radni direktorijum
-WORKDIR /app
-
-# Kopiramo JAR iz builder stage-a
-COPY --from=builder /app/target/Backend-0.0.1-SNAPSHOT.jar app.jar
+# Buildujemo aplikaciju
+RUN mvn clean package -DskipTests -B
 
 # Ekspozujemo port 8080
 EXPOSE 8080
 
-# Pokretamo aplikaciju sa Docker profile
-CMD ["java", "-jar", "-Dspring.profiles.active=docker", "app.jar"]
+# Pokretamo aplikaciju direktno
+CMD ["java", "-jar", "-Dspring.profiles.active=docker", "target/Backend-0.0.1-SNAPSHOT.jar"]
