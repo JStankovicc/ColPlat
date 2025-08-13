@@ -7,8 +7,12 @@ RUN apk add --no-cache maven curl netcat-openbsd
 # Postavljamo radni direktorijum
 WORKDIR /app
 
-# Kopiramo sve potrebno odjednom
-COPY . .
+# Kopiramo fajlove eksplicitno (bez trailing slash)
+COPY pom.xml .
+COPY src src
+COPY .mvn .mvn
+COPY mvnw .
+COPY mvnw.cmd .
 
 # Debug - proveravamo šta je kopirano i case-sensitivity
 RUN echo "=== ROOT DIRECTORY ==="
