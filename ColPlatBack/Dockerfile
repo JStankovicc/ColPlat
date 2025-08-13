@@ -7,14 +7,11 @@ RUN apk add --no-cache maven curl netcat-openbsd
 # Postavljamo radni direktorijum
 WORKDIR /app
 
-# Kopiramo pom.xml prvo za cache-ovanje dependencies
-COPY pom.xml .
+# Kopiramo sve potrebno odjednom
+COPY . .
 
 # Preuzimamo dependencies
 RUN mvn dependency:go-offline -B
-
-# Kopiramo source kod
-COPY src ./src
 
 # Debug - proveravamo da li su source fajlovi kopirani
 RUN ls -la src/
