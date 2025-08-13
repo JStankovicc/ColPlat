@@ -18,7 +18,11 @@ COPY src ./src
 
 # Debug - proveravamo da li su source fajlovi kopirani
 RUN ls -la src/
-RUN ls -la src/main/java/com/ColPlat/Backend/ || echo "Source files not found"
+RUN ls -la src/main/
+RUN ls -la src/main/java/ || echo "Java dir not found"
+RUN ls -la src/main/java/com/ || echo "com dir not found"  
+RUN ls -la src/main/java/com/ColPlat/ || echo "ColPlat dir not found"
+RUN ls -la src/main/java/com/ColPlat/Backend/ || echo "Backend dir not found"
 
 # Buildujemo aplikaciju
 RUN mvn clean package -DskipTests -B
